@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Painel de Periféricos</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <h1>🖥️ Painel de Periféricos</h1>
+    <p>Teste real, no browser, dos periféricos ligados a este computador: rato, teclado, comandos
+       (gamepads), dispositivos HID, câmara e microfone. Todas as leituras são locais — nada sai da tua máquina.</p>
+  </header>
+
+  <nav class="tabs" id="tabs">
+    <button class="tab active" data-tab="painel">📊 Painel</button>
+    <button class="tab" data-tab="rato">🖱️ Rato</button>
+    <button class="tab" data-tab="teclado">⌨️ Teclado</button>
+    <button class="tab" data-tab="gamepad">🎮 Comandos</button>
+    <button class="tab" data-tab="hid">🔌 HID</button>
+    <button class="tab" data-tab="media">📷 Câmara e microfone</button>
+    <button class="tab" data-tab="dispositivos">🔍 Todos os dispositivos</button>
+    <a class="tab" href="remoto.html">🖥️ Controlo remoto</a>
+  </nav>
+
+  <main>
+
+    <!-- ==================== PAINEL ==================== -->
+    <section id="tab-painel" class="section active">
+      <div class="grid">
+
+        <div class="card">
+          <h2>Dispositivos detetados</h2>
+          <div class="kv"><span>Comandos (gamepads)</span><strong id="ov-gamepads">—</strong></div>
+          <div class="kv"><span>Dispositivos de áudio/vídeo</span><strong id="ov-media">—</strong></div>
+          <div class="kv"><span>Dispositivos HID autorizados</span><strong id="ov-hid">—</strong></div>
+          <div class="kv"><span>Dispositivos do sistema</span><strong id="ov-dev">—</strong></div>
+          <div style="margin-top:12px">
+            <button id="ov-refresh" class="btn">↻ Atualizar</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Bateria</h2>
+          <div class="meter"><span id="bat-meter"></span></div>
+          <div class="kv"><span>Nível</span><strong id="bat-level">—</strong></div>
+          <div class="kv"><span>A carregar</span><strong id="bat-charging">—</strong></div>
+          <div class="kv"><span>Tempo até ficar cheia</span><strong id="bat-full">—</strong></div>
+          <div class="kv"><span>Tempo restante</span><strong id="bat-left">—</strong></div>
+        </div>
+
+        <div class="card">
+          <h2>Rede</h2>
+          <div class="kv"><span>Tipo de ligação</span><strong id="net-type">—</strong></div>
+          <div class="kv"><span>Tipo efetivo</span><strong id="net-eff">—</strong></div>
+          <div class="kv"><span>Largura de banda</span><strong id="net-down">—</strong></div>
+          <div class="kv"><span>Latência (RTT)</span><strong id="net-rtt">—</strong></div>
+          <div class="kv"><span>Poupança de dados</span><strong id="net-save">—</strong></div>
+        </div>
+
+        <div class="card">
+          <h2>Ecrã</h2>
+          <div class="kv"><span>Resolução</span><strong id="scr-res">—</strong></div>
+          <div class="kv"><span>Área disponível</span><strong id="scr-avail">—</strong></div>
+          <div class="kv"><span>Profundidade de cor</span><strong id="scr-depth">—</strong></div>
+          <div class="kv"><span>Pixel ratio</span><strong id="scr-dpr">—</strong></div>
+          <div class="kv"><span>Orientação</span><strong id="scr-orient">—</strong></div>
+        </div>
+
+        <div class="card">
+          <h2>PCs ligados (controlo remoto)</h2>
+          <p class="hint">Máquinas com o agente ligado a este servidor. Clica num PC para o controlares.</p>
+          <div id="pc-list" class="pc-list"></div>
+          <div style="margin-top:12px">
+            <button id="pc-refresh" class="btn">↻ Atualizar</button>
+            <a class="btn" href="remoto.html">🖥️ Abrir controlo remoto</a>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Sistema</h2>
+          <div class="kv"><span>Núcleos lógicos</span><strong id="sys-cores">—</strong></div>
+          <div class="kv"><span>Memória aproximada</span><strong id="sys-mem">—</strong></div>
+          <div class="kv"><span>Plataforma</span><strong id="sys-platform">—</strong></div>
+          <div class="kv"><span>User agent</span><strong id="sys-ua" class="mono small">—</strong></div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==================== RATO ==================== -->
+    <section id="tab-rato" class="section">
+      <div class="mouse-layout">
+
+        <div class="card mouse-card">
+          <h2>Área de teste do rato</h2>
+          <p class="hint">Mexe, clica, arrasta e usa a roda dentro da área. O clique direito e a roda são
+             capturados aqui para não interferirem com a página.</p>
+          <div id="mouse-pad" class="mouse-pad">
+            <canvas id="mouse-canvas"></canvas>
+            <div class="pad-label mono" id="mouse-pad-label">0, 0</div>
+          </div>
+        </div>
+
+        <div>
+          <div class="card">
+            <h2>Leituras em tempo real</h2>
+            <div class="kv"><span>Posição na área (x, y)</span><strong id="m-pos" class="mono">—</strong></div>
+            <div class="kv"><span>clientX / clientY</span><strong id="m-client" class="mono">—</strong></div>
+            <div class="kv"><span>screenX / screenY</span><strong id="m-screen" class="mono">—</strong></div>
+            <div class="kv"><span>movementX / movementY</span><strong id="m-move" class="mono">—</strong></div>
+            <div class="kv"><span>Roda (deltaY)</span><strong id="m-wheel" class="mono">—</strong></div>
+            <h3>Botões</h3>
+            <div class="chips" id="m-buttons"></div>
+          </div>
+
+          <div class="card">
+            <h2>Contadores</h2>
+            <div class="kv"><span>Cliques botão esquerdo</span><strong id="m-c-left" class="mono">0</strong></div>
+            <div class="kv"><span>Cliques botão do meio</span><strong id="m-c-middle" class="mono">0</strong></div>
+            <div class="kv"><span>Cliques botão direito</span><strong id="m-c-right" class="mono">0</strong></div>
+            <div class="kv"><span>Duplos cliques</span><strong id="m-c-dbl" class="mono">0</strong></div>
+            <div class="kv"><span>Roda para cima</span><strong id="m-c-wu" class="mono">0</strong></div>
+            <div class="kv"><span>Roda para baixo</span><strong id="m-c-wd" class="mono">0</strong></div>
+            <div style="margin-top:12px">
+              <button id="m-reset" class="btn">↺ Reiniciar contadores</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==================== TECLADO ==================== -->
+    <section id="tab-teclado" class="section">
+
+      <div class="card">
+        <h2>Última tecla</h2>
+        <div class="kv"><span>key (valor)</span><strong id="k-key" class="mono">—</strong></div>
+        <div class="kv"><span>code (posição física)</span><strong id="k-code" class="mono">—</strong></div>
+        <div class="kv"><span>keyCode (legado)</span><strong id="k-which" class="mono">—</strong></div>
+        <h3>Modificadores</h3>
+        <div class="chips">
+          <span class="chip" id="k-ctrl">Ctrl</span>
+          <span class="chip" id="k-shift">Shift</span>
+          <span class="chip" id="k-alt">Alt</span>
+          <span class="chip" id="k-meta">Win / Meta</span>
+        </div>
+        <label class="check">
+          <input type="checkbox" id="k-capture">
+          Capturar teclas (impede o browser de reagir a F5, Tab, etc.)
+        </label>
+        <p class="hint">Atalhos reservados do browser (ex.: Ctrl+W, Ctrl+T) não podem ser capturados por páginas web.</p>
+      </div>
+
+      <div class="card">
+        <h2>Mapa do teclado</h2>
+        <p class="hint">Layout desenhado por posição física (<code>event.code</code>), funciona em qualquer
+           idioma. As teclas pressionadas ficam destacadas.</p>
+        <div id="keyboard" class="keyboard"></div>
+      </div>
+
+    </section>
+
+    <!-- ==================== COMANDOS / GAMEPADS ==================== -->
+    <section id="tab-gamepad" class="section">
+      <p class="hint">Liga um comando por USB ou Bluetooth e pressiona qualquer botão para o browser o detetar.</p>
+      <div id="gamepad-empty" class="empty">
+        <div class="empty-icon">🎮</div>
+        <p>Nenhum comando detetado.</p>
+        <p class="hint">Pressiona um botão no comando depois de o ligar — é assim que o browser o deteta.</p>
+      </div>
+      <div id="gamepad-list"></div>
+    </section>
+
+    <!-- ==================== WEBHID ==================== -->
+    <section id="tab-hid" class="section">
+
+      <div class="card">
+        <h2>Dispositivos HID</h2>
+        <p class="hint">O WebHID permite falar diretamente com periféricos HID: teclados e ratos de jogo,
+           impressoras térmicas, controladores industriais, arduinos, etc. Escolhe um dispositivo e o painel
+           fica à escuta dos relatórios (input reports) que ele envia.</p>
+        <button id="hid-request" class="btn primary">🔗 Ligar dispositivo HID</button>
+        <div id="hid-unsupported" class="alert bad" hidden>
+          WebHID não é suportado neste browser. Usa Chrome ou Edge (desktop).
+        </div>
+        <div id="hid-empty" class="empty" hidden>
+          <p>Ainda não há dispositivos HID autorizados.</p>
+          <p class="hint">Clica em "Ligar dispositivo HID" para abrir o seletor do browser.</p>
+        </div>
+        <div id="hid-list"></div>
+      </div>
+
+      <div class="card">
+        <h2>Relatórios recebidos</h2>
+        <div id="hid-log" class="log"></div>
+        <div style="margin-top:12px">
+          <button id="hid-clear" class="btn">🗑 Limpar</button>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ==================== CÂMARA E MICROFONE ==================== -->
+    <section id="tab-media" class="section">
+
+      <div class="card">
+        <h2>Dispositivos de áudio e vídeo</h2>
+        <div id="media-list"></div>
+        <div style="margin-top:12px">
+          <button id="media-refresh" class="btn">↻ Atualizar</button>
+        </div>
+        <p class="hint">Os nomes dos dispositivos só aparecem depois de concederes permissão de câmara ou microfone.</p>
+      </div>
+
+      <div class="grid two">
+        <div class="card">
+          <h2>Câmara</h2>
+          <select id="cam-select" class="select"></select>
+          <div class="row-btns">
+            <button id="cam-start" class="btn primary">▶ Ligar</button>
+            <button id="cam-stop" class="btn">■ Parar</button>
+          </div>
+          <video id="cam-video" class="video" autoplay playsinline muted></video>
+        </div>
+
+        <div class="card">
+          <h2>Microfone</h2>
+          <select id="mic-select" class="select"></select>
+          <div class="row-btns">
+            <button id="mic-start" class="btn primary">▶ Ligar</button>
+            <button id="mic-stop" class="btn">■ Parar</button>
+          </div>
+          <div class="meter"><span id="mic-meter"></span></div>
+          <div class="kv"><span>Nível de som</span><strong id="mic-level" class="mono">0%</strong></div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ==================== TODOS OS DISPOSITIVOS ==================== -->
+    <section id="tab-dispositivos" class="section">
+
+      <div class="card">
+        <h2>Todos os dispositivos do computador</h2>
+        <p class="hint">Lista completa de dispositivos Plug and Play da máquina que corre o servidor — USB,
+           HID, áudio, vídeo, Bluetooth, impressoras, ecrãs, controladores e todo o resto. Lida localmente
+           pelo servidor, sem enviar nada para fora.</p>
+
+        <div class="filters">
+          <input id="dev-search" class="select" type="search" placeholder="Filtrar por nome, fabricante, classe ou ID…">
+          <select id="dev-class" class="select"></select>
+          <button id="dev-refresh" class="btn">↻ Atualizar</button>
+          <span id="dev-count" class="hint">—</span>
+        </div>
+
+        <div id="dev-list" class="dev-list"></div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <footer class="foot">
+    <p>Compatibilidade: Chrome ou Edge no desktop (Safari e browsers móveis não têm WebHID). WebHID, câmara
+       e microfone só funcionam em contexto seguro — <code>https://</code> ou <code>http://localhost</code>.</p>
+    <p>Abrir por um IP da rede local (gama <code>192.168.0.1</code>–<code>192.168.1.254</code>, ex.:
+       <code>http://192.168.1.88:8080</code>) não basta: o browser esconde essas APIs. Para as usar nesse
+       endereço, marca-o como seguro em <code>chrome://flags/#unsafely-treat-insecure-origin-as-secure</code>
+       (ou põe HTTPS à frente do servidor).</p>
+    <p>Este painel apenas <em>lê</em> os periféricos ligados ao computador onde estás, com a tua permissão.
+       Ver ou controlar outro PC só acontece na página <a href="remoto.html">Controlo remoto</a>, depois de
+       autenticado com o token do servidor.</p>
+  </footer>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

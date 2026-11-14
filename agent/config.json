@@ -1,0 +1,7 @@
+{
+  "server": "ws://192.168.1.88:8080/ws",
+  "token": "5820108cfda77b0d04464d10d0881b85",
+  "name": "DESKTOP-FSK7C12",
+  "fps": 5,
+  "quality": 60
+}

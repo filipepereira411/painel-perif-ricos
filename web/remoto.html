@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Controlo Remoto</title>
+  <link rel="stylesheet" href="css/style-remoto.css">
+</head>
+<body>
+
+  <!-- ==================== ECRÃ DE LIGAÇÃO ==================== -->
+  <div id="login" class="login-wrap">
+    <div class="login-card">
+      <h1>🖥️ Controlo Remoto</h1>
+      <p class="hint">Ver e controlar o ecrã, rato e teclado de outro PC onde o agente esteja a correr.</p>
+
+      <label for="in-url">Servidor (IP ou endereço)</label>
+      <input id="in-url" class="input mono" placeholder="192.168.1.88:8080" autocomplete="off" spellcheck="false">
+
+      <label for="in-token">Token</label>
+      <input id="in-token" class="input mono" type="password" placeholder="token mostrado pelo servidor" autocomplete="off" spellcheck="false">
+
+      <label class="check save-line">
+        <input type="checkbox" id="in-save" checked>
+        Guardar endereço e token neste browser
+      </label>
+
+      <div id="login-error" class="alert bad" hidden></div>
+
+      <button id="btn-connect" class="btn primary wide-btn">🔌 Ligar</button>
+
+      <details class="agent-setup">
+        <summary>Quero ser controlado — configurar o agente</summary>
+        <p class="hint">Copia este JSON para <code>agent/config.json</code> no PC a controlar e executa
+           <code>start-agent.bat</code>. O agente precisa de Node.js 22+ e Windows.</p>
+
+        <label for="ag-host">Endereço deste servidor (para o agente)</label>
+        <input id="ag-host" class="input mono" placeholder="192.168.1.88:8080" spellcheck="false">
+
+        <label for="ag-name">Nome deste PC</label>
+        <input id="ag-name" class="input" placeholder="Meu-PC" spellcheck="false">
+
+        <textarea id="ag-config" class="input mono" rows="9" readonly spellcheck="false"></textarea>
+
+        <div id="ag-warn" class="alert bad" hidden>
+          O endereço aponta para <code>localhost</code> — o agente noutro PC não conseguirá chegar aqui.
+          Usa o IP da rede (ex.: 192.168.1.88:8080).
+        </div>
+
+        <div class="row-btns">
+          <button id="ag-copy" class="btn">📋 Copiar</button>
+          <button id="ag-download" class="btn">💾 Descarregar</button>
+        </div>
+      </details>
+
+      <p class="hint"><a href="index.html">← Painel de periféricos</a></p>
+    </div>
+  </div>
+
+  <!-- ==================== APLICAÇÃO ==================== -->
+  <div id="app" class="app hidden">
+
+    <div class="toolbar">
+      <span id="st-dot" class="dot off"></span>
+      <strong id="st-agent">sem agente</strong>
+      <select id="sel-agent" class="input mono" title="Escolher o PC remoto">
+        <option value="">sem PCs ligados</option>
+      </select>
+      <span class="sep"></span>
+
+      <label class="check"><input type="checkbox" id="ctl-mode"> 🎛️ Controlo</label>
+
+      <span class="inline">FPS <input type="range" id="ctl-fps" min="1" max="30" step="1" value="5"><b id="st-fps">0 fps</b></span>
+      <span class="inline">Qualidade <input type="range" id="ctl-q" min="20" max="95" step="5" value="60"></span>
+
+      <button id="btn-full" class="btn">⛶ Ecrã inteiro</button>
+      <span class="spacer"></span>
+      <span class="mono">ping <b id="st-ping">—</b></span>
+      <span class="mono" id="st-res">—</span>
+      <button id="btn-disconnect" class="btn">✕ Desligar</button>
+    </div>
+
+    <div class="main">
+      <div id="screen-wrap" class="screen-wrap">
+        <canvas id="screen" tabindex="0"></canvas>
+        <div id="overlay" class="overlay" hidden>
+          <div class="empty-icon">🖥️</div>
+          <p id="overlay-text">à espera que o agente se ligue…</p>
+        </div>
+      </div>
+
+      <aside class="side">
+
+        <div class="card">
+          <h2>Agente</h2>
+          <div class="kv"><span>Nome</span><strong id="r-name">—</strong></div>
+          <div class="kv"><span>Sistema</span><strong id="r-os">—</strong></div>
+          <div class="kv"><span>Arquitetura</span><strong id="r-arch">—</strong></div>
+          <div class="kv"><span>Núcleos</span><strong id="r-cpus">—</strong></div>
+          <div class="kv"><span>Memória</span><strong id="r-mem">—</strong></div>
+          <div class="kv"><span>Ligado há</span><strong id="r-uptime">—</strong></div>
+          <div class="kv"><span>Ecrã virtual</span><strong id="r-vscreen">—</strong></div>
+        </div>
+
+        <div class="card">
+          <h2>Desempenho</h2>
+          <div class="kv"><span>Captura</span><strong id="r-cap">—</strong></div>
+          <div class="kv"><span>Injeção de input</span><strong id="r-inp">—</strong></div>
+          <div class="kv"><span>Latência</span><strong id="r-ping2">—</strong></div>
+        </div>
+
+        <div class="card">
+          <h2>Enviar texto</h2>
+          <p class="hint">Escreve no PC remoto como se estivesses a digitar (acentos incluídos).</p>
+          <textarea id="send-text" class="input" rows="3" placeholder="Texto a escrever no PC remoto…"></textarea>
+          <div class="row-btns">
+            <button id="btn-send-text" class="btn primary">⌨️ Enviar</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Eventos</h2>
+          <div id="log" class="log"></div>
+        </div>
+
+        <div class="card">
+          <h2>Ajuda</h2>
+          <p class="hint">Ativa <strong>🎛️ Controlo</strong> e clica no ecrã para ganhar foco do teclado.
+             Ctrl+Alt+Del e atalhos do browser (Ctrl+T, Ctrl+W) não podem ser enviados.</p>
+          <p class="hint"><a href="index.html">← Painel de periféricos</a></p>
+        </div>
+
+      </aside>
+    </div>
+
+    <footer class="foot">
+      <p>Tráfego <code>ws://</code> não é cifrado — usa em LAN de confiança ou por VPN.</p>
+    </footer>
+
+  </div>
+
+  <script src="js/client.js"></script>
+</body>
+</html>
